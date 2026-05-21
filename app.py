@@ -11,7 +11,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'cano_gizli_123')
-# Render için kalıcı veritabanı yolu
+# Render için kalıcı Linux klasör yolu (.db sıfırlanmaz)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/platform.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -35,7 +35,7 @@ class Note(db.Model):
     category = db.Column(db.String(50), nullable=False)
     content = db.Column(db.Text, nullable=False)
     summary = db.Column(db.Text, nullable=True)
-    questions = db.Column(db.Text, nullable=True) # YENİ: AI Soruları burada duracak
+    questions = db.Column(db.Text, nullable=True) # AI Sınav Soruları Alanı
     image_path = db.Column(db.String(200), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
@@ -71,7 +71,7 @@ def login():
             session['user_id'] = user.id
             session['username'] = user.username
             return redirect(url_for('dashboard'))
-        flash('Hata!', 'danger')
+        flash('Hata! Kullanıcı adı veya şifre yanlış.', 'danger')
     return render_template('login.html')
 
 @app.route('/dashboard', methods=['GET', 'POST'])
@@ -103,11 +103,18 @@ def summarize_note(note_id):
     note = Note.query.get_or_404(note_id)
     try:
         client = genai.Client()
-        # CANO ÖZEL PROMPT: Hem özet hem soru istiyoruz
+        # Adaptif Eğitim Promptu
         instruction = f"""
-        Sen uzman bir öğretmensin. Bu {note.student_class} düzeyi {note.category} notunu analiz et.
-        1. Bölüm: Önemli yerleri 'DERS ÖZETİ' başlığı altında çok net ve büyük maddelerle açıkla.
-        2. Bölüm: 'BİLGİ ÖLÇME TESTİ' başlığı altında, bu notla ilgili öğrencinin seviyesini ölçecek 3 adet çoktan seçmeli soru hazırla.
+        Sen 9. sınıf öğrencilerine ders anlatan uzman, samimi ve vizyoner bir lise öğretmenisin. 
+        Öncelikle sana verilen bu {note.student_class} seviyesindeki {note.category} ders notunu çok derinlemesine analiz et.
+        
+        Senden iki ana bölümden oluşan bir içerik üretmeni istiyorum. Bölüm başlıklarını AYNEN aşağıdaki gibi yazmalısın:
+
+        1. BÖLÜM BAŞLIĞI: 📝 YAPAY ZEKA DERS ÖZETİ
+        Bu başlık altında konunun temel mantığını, can alıcı püf noktalarını ve sınavda kesin çıkacak yerleri geniş, detaylı ve son derece açıklayıcı maddeler halinde anlat. Kısa kesme, rehberlik et.
+
+        2. BÖLÜM BAŞLIĞI: 🧠 BİLGİ ÖLÇME VE HEDEF TESTİ
+        Bu başlık altında, öğrencinin konuyu ne kadar anladığını ölçmek için tam 3 adet çoktan seçmeli (A, B, C, D şıklı) kaliteli soru hazırla. Soruların hemen altına doğru cevapları ve kısa çözümlerini de ekle ki öğrenci kendi teşhisini koyabilsin.
         """
         
         if note.image_path:
@@ -115,17 +122,19 @@ def summarize_note(note_id):
         else:
             response = client.models.generate_content(model='gemini-2.0-flash', contents=[note.content, instruction])
         
-        # Gelen metni ikiye bölmeye çalışalım veya olduğu gibi kaydedelim
         full_text = response.text
-        if "BİLGİ ÖLÇME TESTİ" in full_text:
-            parts = full_text.split("BİLGİ ÖLÇME TESTİ")
-            note.summary = parts[0].strip()
-            note.questions = "BİLGİ ÖLÇME TESTİ" + parts[1].strip()
+        
+        # Metni akıllıca ikiye bölüp veritabanına kaydedelim
+        if "🧠 BİLGİ ÖLÇME VE HEDEF TESTİ" in full_text:
+            parts = full_text.split("🧠 BİLGİ ÖLÇME VE HEDEF TESTİ")
+            note.summary = parts[0].replace("📝 YAPAY ZEKA DERS ÖZETİ", "").strip()
+            note.questions = parts[1].strip()
         else:
             note.summary = full_text
+            note.questions = "Bu not için test soruları oluşturulurken bir hata oluştu. Lütfen tekrar deneyin."
             
         db.session.commit()
-        flash('Analiz tamamlandı!', 'success')
+        flash('Analiz başarıyla tamamlandı, test hazır!', 'success')
     except Exception as e:
         flash(f'Hata: {str(e)}', 'danger')
     return redirect(url_for('dashboard'))
