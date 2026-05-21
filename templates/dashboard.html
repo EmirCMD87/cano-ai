@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cano AI - Akıllı Öğrenci Paneli</title>
+    <title>Cano AI - Parlak Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* TÜM SAYFAYI KOYU YAPALIM Kİ BEYAZ YAZILAR PATLASIN */
         body { 
             background-color: #0f172a !important; 
-            color: #f1f5f9 !important;
+            color: #ffffff !important;
             font-family: 'Segoe UI', Roboto, sans-serif;
         }
         .navbar-custom { background: #1e293b; border-bottom: 2px solid #38bdf8; }
         .custom-card { border: none; border-radius: 20px; background: #1e293b; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+        
         .form-control, .form-select {
             background: #0f172a !important;
             color: #ffffff !important;
@@ -21,8 +23,28 @@
             padding: 12px !important;
         }
         .form-control::placeholder { color: #64748b !important; }
-        .form-label { font-weight: 700; color: #94a3b8; font-size: 15px; letter-spacing: 0.5px; }
+        .form-label { font-weight: 700; color: #94a3b8; font-size: 15px; }
         .badge-custom { font-size: 1.1rem; padding: 8px 16px; border-radius: 30px; }
+
+        /* KUTULARIN ARKA PLANINI KOYU YAPIP İÇİNDEKİ HER ŞEYİ BEYAZA ZORLUYORUZ */
+        .cano-ozet-kutusu {
+            background-color: #020617 !important;
+            border-left: 10px solid #38bdf8 !important;
+            padding: 40px !important;
+            border-radius: 18px !important;
+            margin-top: 30px !important;
+            margin-bottom: 30px !important;
+            color: #ffffff !important; /* Kutu içindeki her metni beyaz yapar */
+        }
+
+        .cano-test-kutusu {
+            background-color: #0b0f19 !important;
+            border: 4px dashed #6366f1 !important;
+            padding: 40px !important;
+            border-radius: 18px !important;
+            margin-top: 40px !important;
+            color: #ffffff !important; /* Kutu içindeki her metni beyaz yapar */
+        }
     </style>
 </head>
 <body>
@@ -72,7 +94,7 @@
                         </div>
                         <div class="mb-4">
                             <label class="form-label">EK NOT METNİ (OPSİYONEL)</label>
-                            <textarea name="content" class="form-control rounded-3" rows="4" placeholder="Metin halinde eklemek istediğin bir şey varsa yaz..."></textarea>
+                            <textarea name="content" class="form-control rounded-3" rows="4" placeholder="Metin eklemek isterseniz buraya yazın..."></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary w-100 fw-bold py-3 fs-5 shadow" style="background: #4f46e5; border: none; border-radius: 12px;">Sisteme Kaydet</button>
                     </form>
@@ -80,12 +102,11 @@
             </div>
 
             <div class="col-lg-8">
-                <h3 class="fw-bold mb-4 text-white d-flex align-items-center">📚 Kayıtlı Dosyalarım ve Analizler</h3>
+                <h3 class="fw-bold mb-4 text-white">📚 Kayıtlı Dosyalarım ve Analizler</h3>
                 
                 {% if not notes %}
                     <div class="text-center p-5 rounded-4" style="background: #1e293b; border: 2px dashed #334155;">
                         <h4 class="text-white fw-bold mb-2">Henüz not yüklenmemiş cano!</h4>
-                        <p class="text-muted fs-5">Soldaki paneli kullanarak ilk ders notunu sisteme fırlat.</p>
                     </div>
                 {% endif %}
 
@@ -107,24 +128,24 @@
                         {% endif %}
 
                         {% if note.summary %}
-                            <div class="shadow-lg" style="background: #020617 !important; border-left: 10px solid #38bdf8 !important; padding: 40px !important; border-radius: 18px !important; margin-top: 30px !important; margin-bottom: 30px !important;">
-                                <h3 style="color: #38bdf8 !important; font-size: 34px !important; font-weight: 900 !important; margin-bottom: 25px !important; text-transform: uppercase; letter-spacing: 1px;">📝 YAPAY ZEKA DERS ÖZETİ</h3>
-                                <div style="white-space: pre-line; font-size: 26px !important; line-height: 1.9 !important; color: #ffffff !important; font-weight: 700 !important;">
+                            <div class="cano-ozet-kutusu shadow-lg">
+                                <h3 style="color: #38bdf8 !important; font-size: 34px !important; font-weight: 900 !important; margin-bottom: 25px !important;">📝 YAPAY ZEKA DERS ÖZETİ</h3>
+                                <div style="white-space: pre-line !important; font-size: 26px !important; line-height: 1.9 !important; color: #ffffff !important; font-weight: 700 !important;">
                                     {{ note.summary }}
                                 </div>
                             </div>
 
                             {% if note.questions %}
-                            <div class="shadow-lg" style="background: #0b0f19 !important; border: 4px dashed #6366f1 !important; padding: 40px !important; border-radius: 18px !important; margin-top: 40px !important;">
-                                <h3 style="color: #a5b4fc !important; font-size: 34px !important; font-weight: 900 !important; margin-bottom: 25px !important; text-transform: uppercase; letter-spacing: 1px;">🧠 BİLGİ ÖLÇME VE HEDEF TESTİ</h3>
-                                <div style="white-space: pre-line; font-size: 26px !important; line-height: 1.9 !important; color: #ffffff !important; font-weight: 700 !important;">
+                            <div class="cano-test-kutusu shadow-lg">
+                                <h3 style="color: #a5b4fc !important; font-size: 34px !important; font-weight: 900 !important; margin-bottom: 25px !important;">🧠 BİLGİ ÖLÇME VE HEDEF TESTİ</h3>
+                                <div style="white-space: pre-line !important; font-size: 26px !important; line-height: 1.9 !important; color: #ffffff !important; font-weight: 700 !important;">
                                     {{ note.questions }}
                                 </div>
                             </div>
                             {% endif %}
                         {% else %}
                             <div class="text-center py-5">
-                                <a href="/summarize/{{ note.id }}" class="btn btn-lg btn-success rounded-pill px-5 py-4 fw-bold shadow-lg fs-3 animate-bounce" style="background: #10b981; border: none;">
+                                <a href="/summarize/{{ note.id }}" class="btn btn-lg btn-success rounded-pill px-5 py-4 fw-bold shadow-lg fs-3" style="background: #10b981; border: none;">
                                     🚀 Yapay Zeka ile Analiz Et & Sınav Hazırla
                                 </a>
                             </div>
