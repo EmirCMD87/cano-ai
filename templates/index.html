@@ -2,39 +2,467 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cano AI Ders Platformu</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cano AI — Akıllı Ders Platformu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #060910;
+            --surface: #0d1117;
+            --surface2: #161b27;
+            --border: rgba(255,255,255,0.07);
+            --accent: #4ade80;
+            --accent2: #818cf8;
+            --accent3: #38bdf8;
+            --text: #f0f4ff;
+            --muted: #6b7a99;
+        }
+
+        html { scroll-behavior: smooth; }
+
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Grain overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.4;
+        }
+
+        /* Glow orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .orb-1 {
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(74, 222, 128, 0.08) 0%, transparent 70%);
+            top: -200px; left: -200px;
+        }
+        .orb-2 {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(129, 140, 248, 0.08) 0%, transparent 70%);
+            bottom: -100px; right: -100px;
+        }
+
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 20px 48px;
             display: flex;
             align-items: center;
-            color: #f8fafc;
+            justify-content: space-between;
+            background: rgba(6, 9, 16, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
         }
-        .hero-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo-dot {
+            width: 8px; height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.6; }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-ghost {
+            padding: 10px 22px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--muted);
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .btn-ghost:hover {
+            border-color: rgba(255,255,255,0.2);
+            color: var(--text);
+            background: var(--surface);
+        }
+
+        .btn-primary {
+            padding: 10px 24px;
+            background: var(--accent);
+            color: #060910;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            transition: all 0.2s;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary:hover {
+            background: #6ee7a0;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(74, 222, 128, 0.25);
+        }
+
+        /* Hero */
+        .hero {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 100px 24px 60px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: rgba(74, 222, 128, 0.08);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 100px;
+            font-size: 0.82rem;
+            color: var(--accent);
+            margin-bottom: 32px;
+            animation: fadeUp 0.6s ease both;
+        }
+
+        .hero h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2.8rem, 7vw, 5.5rem);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -0.03em;
+            max-width: 800px;
+            animation: fadeUp 0.6s 0.1s ease both;
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: var(--muted);
+            max-width: 520px;
+            line-height: 1.7;
+            margin: 24px auto 40px;
+            font-weight: 300;
+            animation: fadeUp 0.6s 0.2s ease both;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp 0.6s 0.3s ease both;
+        }
+
+        .btn-large {
+            padding: 14px 36px;
+            font-size: 1rem;
+        }
+
+        /* Features grid */
+        .features {
+            position: relative;
+            z-index: 1;
+            padding: 80px 24px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            text-align: center;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 60px;
+            letter-spacing: -0.02em;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.02) 100%);
+        }
+        .feature-card:hover {
+            border-color: rgba(74, 222, 128, 0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .feature-icon {
+            width: 44px; height: 44px;
+            background: rgba(74, 222, 128, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.65;
+        }
+
+        /* Stats */
+        .stats {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            max-width: 700px;
+            margin: 0 auto 80px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface);
+            overflow: hidden;
+        }
+
+        .stat {
+            padding: 32px 20px;
+            text-align: center;
+            border-right: 1px solid var(--border);
+        }
+        .stat:last-child { border-right: none; }
+
+        .stat-number {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* CTA */
+        .cta-section {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 80px 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .cta-section h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .cta-section p {
+            color: var(--muted);
+            margin-bottom: 36px;
+            font-size: 1.05rem;
+        }
+
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 24px;
+            color: var(--muted);
+            font-size: 0.82rem;
+            border-top: 1px solid var(--border);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            nav { padding: 16px 20px; }
+            .stats { grid-template-columns: 1fr; }
+            .stat { border-right: none; border-bottom: 1px solid var(--border); }
+            .stat:last-child { border-bottom: none; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-7 text-center p-5 hero-card shadow-lg animate__animated animate__fadeIn">
-                <div class="display-4 fw-bold mb-3 text-transparent bg-clip-text bg-gradient" style="background: linear-gradient(45deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                    🤖 Cano AI Ders Platformu
-                </div>
-                <p class="lead text-muted mb-4 fs-5">5. sınıftan 12. sınıfa kadar tüm ders notlarını yükle, yapay zeka saniyeler içinde senin için fotoğrafları okusun ve sınav özetini çıkarsın!</p>
-                <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                    <a href="/login" class="btn btn-primary btn-lg px-5 rounded-pill fw-bold shadow" style="background: #4f46e5; border: none;">Giriş Yap</a>
-                    <a href="/register" class="btn btn-outline-light btn-lg px-5 rounded-pill fw-bold">Kayıt Ol</a>
-                </div>
-            </div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <nav>
+        <a href="/" class="logo">
+            <div class="logo-dot"></div>
+            cano.ai
+        </a>
+        <div class="nav-links">
+            <a href="/login" class="btn-ghost">Giriş Yap</a>
+            <a href="/register" class="btn-primary">Başla →</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="badge">
+            <span>✦</span>
+            Yapay Zeka Destekli Öğrenme Platformu
+        </div>
+        <h1>
+            Ders notların<br>
+            <span class="highlight">daha akıllı</span> olsun
+        </h1>
+        <p>
+            5. sınıftan 12. sınıfa kadar tüm dersler. Fotoğrafını yükle,
+            yapay zeka saniyeler içinde sınav özetini hazırlasın.
+        </p>
+        <div class="hero-actions">
+            <a href="/register" class="btn-primary btn-large">Ücretsiz Başla</a>
+            <a href="/login" class="btn-ghost btn-large">Giriş Yap</a>
+        </div>
+    </section>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-number">8</div>
+            <div class="stat-label">Sınıf Seviyesi</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">15+</div>
+            <div class="stat-label">Ders Kategorisi</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">AI</div>
+            <div class="stat-label">Destekli Analiz</div>
         </div>
     </div>
+
+    <section class="features">
+        <p class="section-label">Özellikler</p>
+        <h2 class="section-title">Her şey tek bir yerde</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📸</div>
+                <h3>Fotoğraf ile Not Al</h3>
+                <p>Defter notlarının fotoğrafını çek, sisteme yükle. Yapay zeka el yazısını okuyup dijital özet çıkarsın.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>Yapay Zeka Özeti</h3>
+                <p>Gemini AI ile desteklenen platform, notlarını madde madde sınav özetine dönüştürür.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3>Tüm Dersler</h3>
+                <p>Matematik, Fizik, Kimya, Biyoloji ve daha fazlası. Ortaokul ve lise müfredatı tam kapsam.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Kişisel & Güvenli</h3>
+                <p>Notların sadece sana ait. Güvenli şifreleme ile hesabın ve içeriklerin korunur.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Anında Analiz</h3>
+                <p>Saniyeler içinde yapay zeka analizi. Sınav öncesi son dakika çalışmaların için mükemmel.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Her Cihazda Çalışır</h3>
+                <p>Telefon, tablet veya bilgisayardan erişim. Mobil uyumlu tasarım ile her yerden çalış.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <h2>Çalışmaya başla</h2>
+        <p>Hesap oluştur, ilk notunu yükle, yapay zekayı dene.</p>
+        <a href="/register" class="btn-primary btn-large">Ücretsiz Hesap Oluştur →</a>
+    </section>
+
+    <footer>
+        © 2025 Cano AI — Akıllı Ders Platformu
+    </footer>
 </body>
 </html>
